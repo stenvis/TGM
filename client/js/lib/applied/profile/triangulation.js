@@ -19,14 +19,17 @@ function generateVertices(profiles_arr) {
 };
 
 function generateIndices(profiles_len, vertices_len) {
-   const indices = []; 
+   const indices = [];
 
    for (let i = 0; i < profiles_len - 1; i++) {
-      const src_i = i * vertices_len, dst_i = ((i + 1) * vertices_len);
+      const src_i = i * vertices_len, dst_i = (i + 1) * vertices_len;
 
       for (let j = 0; j < vertices_len - 1; j++) {
          const
-            i0 = src_i + j, i1 = dst_i + j, i2 = src_i + j + 1, i3 = dst_i + j + 1;
+            i0 = src_i + j,
+            i1 = dst_i + j,
+            i2 = src_i + j + 1,
+            i3 = dst_i + j + 1;
 
          indices.push(
             i0, i1, i2,
@@ -37,11 +40,13 @@ function generateIndices(profiles_len, vertices_len) {
       const j = vertices_len - 1;
 
       const
-         i0 = src_i + j, i1 = dst_i + j, i2 = src_i + j + 1, i3 = dst_i + j + 1;
+         i0 = src_i + j,
+         i1 = dst_i + j,
+         i2 = src_i + j + 1;
 
       indices.push(
-         i0, i1, src_i,  
-         src_i, i1, i2,   
+         i0, i1, src_i,
+         src_i, i1, i2,
          // 14, 29, 0,
          // 0, 29, 15, 
       );
@@ -62,11 +67,11 @@ function generateIndices(profiles_len, vertices_len) {
 };
 
 function triangulate(profiles_arr) {
-   const 
+   const
       profiles_len = profiles_arr.length,
       vertices_len = profiles_arr[0].length / 3;
 
-   const 
+   const
       vertices = generateVertices(profiles_arr),
       indices = generateIndices(profiles_len, vertices_len);
 
