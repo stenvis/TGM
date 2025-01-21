@@ -1,10 +1,9 @@
 import helpers from "./helpers.js";
+import triangulation from "./triangulation.js";
 
 const {
-   circleHelper,
    pointsHelper,
    pathHelper,
-   container,
 } = helpers;
 
 const extruder = {
@@ -16,14 +15,21 @@ const {
 } = Math;
 
 // ------------------------------- TESTS ------------------------------------
-const axis = [
-   { x: 0, y: 10, z: 0, },
-   { x: 5, y: 20, z: 0, },
-   { x: 15, y: 21, z: 0, },
-   { x: 25, y: 20, z: 0, },
-   { x: 30, y: 10, z: 0, },
-   { x: 25, y: 0, z: 0, },
-];
+// const axis = [
+//    { x: 0, y: 0, z: 0, },
+//    { x: 1, y: 10, z: 0, },
+//    { x: 2, y: 15, z: 0, },
+//    { x: 2, y: 15, z: 0, },
+// ];
+
+// const axis = [
+//    { x: 0, y: 10, z: 0, },
+//    { x: 5, y: 20, z: 0, },
+//    { x: 15, y: 21, z: 0, },
+//    { x: 25, y: 20, z: 0, },
+//    { x: 30, y: 10, z: 0, },
+//    { x: 25, y: 0, z: 0, },
+// ];
 
 // const axis = [
 //    { x: 0, y: 10, z: 0, },
@@ -51,38 +57,38 @@ const axis = [
 //    { x: 0, y: 20, z: 20, },
 // ];
 
-// const axis = (function() {
-//    const points = [];
-//    const count = 100;
-//    const radius = 10;
+const axis = (function() {
+   const points = [];
+   const count = 100;
+   const radius = 10;
 
-//    for (let i = 0; i < count; i++) {
-//       const theta = 0.1 + ((2 * Math.PI * i) / count);
-//       points.push({
-//          x: i * cos(theta),
-//          y: i * sin(theta),
-//          // z: i,
-//          z: sin(theta),
+   for (let i = 0; i < count; i++) {
+      const theta = 0.1 + ((2 * Math.PI * i) / count);
+      points.push({
+         // x: i * cos(theta),
+         // y: i * sin(theta),
+         // z: i,
+         // // z: sin(theta),
          
-//          // x: radius * cos(theta),
-//          // y: radius * sin(theta),
-//          // // z: i,
-//          // z: sin(theta),
+         // x: radius * cos(theta),
+         // y: radius * sin(theta),
+         // // z: i,
+         // z: sin(theta),
          
-//          // x: radius * cos(theta),
-//          // y: sin(theta),
-//          // // y: i,
-//          // z: radius * sin(theta),
+         x: radius * cos(theta),
+         y: sin(theta),
+         // y: i,
+         z: radius * sin(theta),
 
-//          // x: sin(theta),
-//          // // x: i,
-//          // y: radius * cos(theta),
-//          // z: radius * sin(theta),
-//        });
-//    }
+         // x: sin(theta),
+         // // x: i,
+         // y: radius * cos(theta),
+         // z: radius * sin(theta),
+       });
+   }
 
-//    return points;
-// })();
+   return points;
+})();
 // ------------------------------- TESTS ------------------------------------
 
 // Right-hand system coordinate
@@ -109,12 +115,14 @@ function drawPath() {
       .normalize();
 };
 
-function cloneProfile(profile_arr) {
+function cloneWithAlignment(profile_arr) {
+   const vertices = [];
+
    for (let i = 0; i < axis.length - 1; i++) {
       const
          point = axis[i],
          next_point = axis[i + 1];
-      
+
       dir.subVectors(next_point, point).normalize();
       up_dir.crossVectors(last_dir, dir).normalize();
       side_dir.crossVectors(dir, up_dir).normalize();
@@ -123,7 +131,7 @@ function cloneProfile(profile_arr) {
          side_dir.x, up_dir.x, dir.x, point.x,
          side_dir.y, up_dir.y, dir.y, point.y,
          side_dir.z, up_dir.z, dir.z, point.z,
-         0, 0, 0, 1
+         0, 0, 0, 1,
       );
 
       const clone_arr = new Float32Array(profile_arr);
@@ -143,13 +151,18 @@ function cloneProfile(profile_arr) {
 
       last_dir.copy(dir);
 
-      pathHelper(clone_arr);
+      vertices.push(clone_arr);
+      // pathHelper(clone_arr);
+      pointsHelper(clone_arr, 0x000000, 0.5);
    };
+
+   return vertices;
 };
 
-function extrude(points_arr) {
+function extrude(profile_arr) {
    drawPath();
-   cloneProfile(points_arr);
+   const profiles_arr = cloneWithAlignment(profile_arr);
+   triangulation.triangulate(profiles_arr);
 };
 
 export default extruder;

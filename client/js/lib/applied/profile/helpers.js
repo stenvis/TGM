@@ -4,6 +4,8 @@ const helpers = {
    circleHelper,
    pointsHelper,
    pathHelper,
+   normalMaterial,
+
    container,
 };
 
@@ -41,9 +43,25 @@ function pathHelper(points_arr, close = true, color = 0x0a7318, linewidth = 2) {
       linewidth,
    });
 
-
    const line = close ? new THREE.LineLoop(geometry, material) : new THREE.Line(geometry, material);
+
    container.add(line);
+};
+
+function normalMaterial(vertices, indices) {
+   const geometry = new THREE.BufferGeometry();
+
+   geometry.setIndex(indices);
+   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+   geometry.computeVertexNormals();
+
+   const material = new THREE.MeshNormalMaterial({ 
+      side: THREE.DoubleSide,
+    });
+
+   const mesh = new THREE.Mesh( geometry, material );
+
+   container.add(mesh);
 };
 
 export default helpers;
