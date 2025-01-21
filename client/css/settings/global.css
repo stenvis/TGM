@@ -1,0 +1,29 @@
+.inputs {
+    position: absolute;
+    top: 0;
+    right: 0;
+    height: 2rem;
+    width: 10rem;
+    z-index: 10;
+    margin: 2rem;
+}
+
+input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    background-color: darkgrey;
+    box-shadow: 1px 2px 2px #d3d3d3;
+    cursor: pointer;
+    height: 2px;
+    width: 100%;
+}
+
+input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    background: black;
+    border-radius: 2px;
+    cursor: pointer;
+    height: 14px;
+    width: 4px
+}
