@@ -4,9 +4,33 @@ const helpers = {
    circleHelper,
    pointsHelper,
    pathHelper,
+   arrowHelper,
+
    normalMaterial,
 
    container,
+};
+
+function arrowHelper(axis, direction = null, color = null) {
+   const DIRECTIONS = {
+      x: new THREE.Vector3(1, 0, 0),
+      y: new THREE.Vector3(0, 1, 0),
+      z: new THREE.Vector3(0, 0, 1),
+   };
+
+   const COLORS = {
+      x: 0xff0000,
+      y: 0x00ff00,
+      z: 0x0000ff,
+   };
+
+   const 
+      origin = new THREE.Vector3(0, 0, 0),
+      length = 5,
+      dir = direction || DIRECTIONS[axis],
+      col = color || COLORS[axis];
+
+   return new THREE.ArrowHelper(dir, origin, length, col);
 };
 
 function circleHelper(r, px, py, numPoints = 70) {
@@ -57,6 +81,8 @@ function normalMaterial(vertices, indices) {
 
    const material = new THREE.MeshNormalMaterial({ 
       side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.8,
     });
 
    const mesh = new THREE.Mesh( geometry, material );

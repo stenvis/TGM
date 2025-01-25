@@ -42,6 +42,28 @@ const hemiLight = new THREE.HemisphereLight(0x03dffc, 0x3d362b, 0.4);
 hemiLight.position.set(0, 20, 0);
 scene.add(hemiLight);
 
+function generateAxis(p0, p1, color) {
+   const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.4 });
+   const points = [
+      new THREE.Vector3(...p0),
+      new THREE.Vector3(...p1),
+   ];
+   const geometry = new THREE.BufferGeometry().setFromPoints( points );
+   return new THREE.Line(geometry, material);
+};
+
+function createAxeseGroup() {
+   const 
+      axis_x  = generateAxis([-1000, 0, 0], [1000, 0, 0], 0xff0000),
+      axis_y  = generateAxis([0, -1000, 0], [0, 1000, 0], 0x00ff00),
+      axis_z  = generateAxis([0, 0, -1000], [0, 0, 1000], 0x0000ff);
+     
+   const group = new THREE.Group().add(axis_x).add(axis_y).add(axis_z);
+   return group;
+}; 
+
+scene.add(createAxeseGroup());
+
 // renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 
 camera.position.set(10, 5, 70);
