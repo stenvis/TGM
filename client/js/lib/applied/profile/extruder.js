@@ -14,14 +14,14 @@ const extruder = {
 
 // ------------------------------- TESTS ------------------------------------
 
-// const axis = [
-//    { x: 0, y: 0, z: 0, },
-//    { x: 10, y: 0, z: 0, },
-//    { x: 15, y: 10, z: 0, },
-//    { x: 10, y: 10, z: 10, },
-//    { x: 10, y: 20, z: 10, },
-//    { x: 0, y: 20, z: 20, },
-// ];
+const axis = [
+   { x: 0, y: 0, z: 0, },
+   { x: 10, y: 0, z: 0, },
+   { x: 15, y: 10, z: 0, },
+   { x: 10, y: 10, z: 10, },
+   { x: 10, y: 20, z: 10, },
+   { x: 0, y: 20, z: 20, },
+];
 
 // const axis = [ 
 //    { x: 0, y: 0, z: 0, },
@@ -89,19 +89,19 @@ const extruder = {
 // const axis = [
 //    { x: 0, y: 10, z: 0, },
 //    { x: 0, y: 20, z: 5, },
-//    { x: 0, y: 21, z: 15, },
-//    { x: 0, y: 20, z: 25, },
-//    { x: 0, y: 10, z: 30, },
-//    { x: 0, y: 0, z: 25, },
+//    // { x: 0, y: 21, z: 15, },
+//    // { x: 0, y: 20, z: 25, },
+//    // { x: 0, y: 10, z: 30, },
+//    // { x: 0, y: 0, z: 25, },
 // ];
 
 // const axis = [
 //    { x: 10, y: 0, z: 0, },
 //    { x: 20, y: 0, z: 5, },
-//    { x: 21, y: 0, z: 15, },
-//    { x: 20, y: 0, z: 25, },
-//    { x: 10, y: 0, z: 30, },
-//    { x: 0, y: 0, z: 25, },
+   // { x: 21, y: 0, z: 15, },
+   // { x: 20, y: 0, z: 25, },
+   // { x: 10, y: 0, z: 30, },
+   // { x: 0, y: 0, z: 25, },
 // ];
 
 // const axis = (function() {
@@ -115,8 +115,8 @@ const extruder = {
 //       points.push({
 //          // x: i * cos(theta),
 //          // y: i * sin(theta),
-//          // // z: i,
-//          // z: sin(theta),
+//          // z: i,
+//          // // z: sin(theta),
 
 //          // x: radius * cos(theta),
 //          // y: radius * sin(theta),
@@ -349,14 +349,15 @@ function crossProjections() {
    cross_projections.push(ortho_projections_1[ortho_projections_1.length - 1]);
 };
 
-function extrude(profile_arr) {
+function extrude(profile_data) {
+   const { points, textures_indices } = profile_data;
    clearState();
    drawPath();
-   setFirst(profile_arr);
-   orthoProjections(profile_arr);
+   setFirst(points);
+   orthoProjections(points);
    crossProjections();
 
-   triangulation.triangulate(cross_projections);
+   triangulation.triangulate(cross_projections, textures_indices);
 };
 
 export default extruder;

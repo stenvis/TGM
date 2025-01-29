@@ -1,310 +1,116 @@
-// function cloneWithAlignment(profile_arr) {
-//    const vertices = [];
+// const vertices = [
+//    -1, -1, 0, // 0
+//    -1, 1, 0, // 1
+//    -1, 1.5, -1, // 2
+//    -1, 1, -2, // 3
+//    -1, -1, -2, // 4
 
-//    for (let i = 0; i < axis.length; i++) {
+//    2, -1, 0, // 5
+//    2, 1, 0, // 6
+//    2, 1.5, -1, // 7
+//    2, 1, -2, // 8
+//    2, -1, -2, // 9
+
+//    8, -1, 0, // 10
+//    8, 1, 0, // 11
+//    8, 1.5, -1, // 12
+//    8, 1, -2, // 13
+//    8, -1, -2, // 14
+// ];
+
+// const indices = [
+//    0, 1, 5,
+//    1, 5, 6,
+
+//    1, 2, 6,
+//    2, 6, 7, 
+
+//    2, 3, 7,
+//    3, 7, 8, 
+
+//    3, 4, 8,
+//    4, 8, 9, 
+
+//    5, 6, 10,
+//    6, 10, 11,
+
+//    6, 7, 11,
+//    7, 11, 12, 
+
+//    7, 8, 12,
+//    8, 12, 13, 
+
+//    8, 9, 13,
+//    9, 13, 14, 
+// ];
+
+// function generateUVs() {
+//    const uvs = [];
+
+//    const PROFILE_COUNT = 3;
+
+//    let min_x = 0;
+//    let min_y = 0;
+
+//    const 
+//       values_x = [],
+//       values_y = [];
+
+//    const len = vertices.length / 3;
+
+//    for (let i = 0; i < PROFILE_COUNT - 1; i++) {
+//       const ci = len * i, ni = len * (i + 1);
 //       const
-//          current_axis = axis[i],
-//          next_axis = axis[i + 1] || current_axis;
+//          cx = vertices[ci],
+//          cy = vertices[ci + 1],
+//          cz = vertices[ci + 2],
+//          nx = vertices[ni],
+//          ny = vertices[ni + 1],
+//          nz = vertices[ni + 2];
 
-//       dir.subVectors(next_axis, current_axis).normalize();
-
-//       basis_y.crossVectors(last_dir, dir).normalize();
-
-//       basis_x.crossVectors(dir, basis_y).normalize();
-
-//       basis_z.copy(dir).normalize();
-
-//       transform_mat4.makeBasis(basis_x, basis_y, basis_z);
-
-//       const
-//          azh = arrowHelper('z', basis_z),
-//          axh = arrowHelper('x', basis_x),
-//          ayh = arrowHelper('y', basis_y);
-
-//       azh.position.add(current_axis);
-//       axh.position.add(current_axis);
-//       ayh.position.add(current_axis);
-
-//       container.add(azh);
-//       container.add(axh);
-//       container.add(ayh);
-
-//       const clone_arr = new Float32Array(profile_arr);
-
-//       for (let i = 0; i < clone_arr.length; i += 3) {
-//          const
-//             x = clone_arr[i],
-//             y = clone_arr[i + 1],
-//             z = clone_arr[i + 2];
-
-//          vertex.set(x, y, z)
-//             .applyMatrix4(transform_mat4)
-//             .add(current_axis);
-
-//          clone_arr[i] = vertex.x;
-//          clone_arr[i + 1] = vertex.y;
-//          clone_arr[i + 2] = vertex.z;
-//       };
-
-//       basis_x.copy(x_axis);
-//       basis_y.copy(y_axis);
-//       basis_z.copy(z_axis);
-//       last_dir.copy(dir);
-
-//       vertices.push(clone_arr);
-//       pathHelper(clone_arr);
-//       pointsHelper(clone_arr, 0x000000, 0.5);
+//       const pointA = new THREE.Vector3(cx, cy, cz);
+//       const pointB = new THREE.Vector3(nx, ny, nz);
+//       const dist = pointA.distanceTo(pointB);
+//       values_x.push(dist);
+//       max_x += dist
 //    };
 
-//    return vertices;
-// };
-
-// function applyQuaternion(quaternion) {
-//    basis_z.applyQuaternion(quaternion);
-//    basis_x.applyQuaternion(quaternion);
-//    basis_y.applyQuaternion(quaternion);
-// };
-
-// function rotateAroundLocalAxis(axis, angle) {
-//     rotation_mat4.makeRotationAxis(axis.clone().normalize(), angle);
-
-//     // Оновлюємо всі базисні вектори
-//     basis_x.applyMatrix4(rotation_mat4).normalize();
-//     basis_y.applyMatrix4(rotation_mat4).normalize();
-//     basis_z.applyMatrix4(rotation_mat4).normalize();
-// };
-
-// function applyAxisAngle(axis, angle) {
-//    basis_z.applyAxisAngle(axis, angle);
-//    basis_x.applyAxisAngle(axis, angle);
-//    basis_y.applyAxisAngle(axis, angle);
-// };
-
-// const quaternion = new THREE.Quaternion();
-
-// function makeProjection(profile_arr) {
-//    const vertices = [];
-
-//    for (let i = 1; i < axis.length - 1; i++) {
+//    for (let i = 0; i < (vertices.length / PROFILE_COUNT) - 3; i+=3) {
 //       const
-//          current_axis = axis[i],
-//          next_axis = axis[i + 1];
-//          // next_axis = axis[i + 1] || current_axis;
+//          cx = vertices[i],
+//          cy = vertices[i + 1],
+//          cz = vertices[i + 2],
+//          nx = vertices[i + 3],
+//          ny = vertices[i + 4],
+//          nz = vertices[i + 5];
 
-//       dir.subVectors(next_axis, current_axis);
-//       // pointsHelper(new Float32Array([dir.x, dir.y, dir.z]), 0xff00ff, 1);
-//       // pointsHelper(new Float32Array([current_axis.x, current_axis.y, current_axis.z]), 0xff00ff, 1);
-
-//       dir.normalize();
-
-//       const
-//          sign_x = Math.sign(dir.x),
-//          sign_z = Math.sign(dir.z);
-
-//       let x_angle, y_angle;
-
-//       {
-//          const height = dir.y;
-//          const len = Math.hypot(dir.x, dir.z);
-//          y_angle = Math.atan2(height, len);
-//       }
-
-//       {
-//          const height = Math.abs(dir.z);
-//          const len = dir.x;
-//          x_angle = Math.atan2(len, height);
-//       }
-
-//       // console.log('log', i);
-//       // console.log('dir_______', dir, dir.clone().negate());
-//       // console.log('basis z_______', basis_z);
-//       // console.log('angles_________', x_angle, y_angle);
-      
-//       quaternion.setFromUnitVectors(basis_z, dir.clone().negate());
-//       applyQuaternion(quaternion);
-
-//       const
-//          azh = arrowHelper('z', basis_z),
-//          axh = arrowHelper('x', basis_x),
-//          ayh = arrowHelper('y', basis_y);
-
-//       azh.position.add(current_axis);
-//       axh.position.add(current_axis);
-//       ayh.position.add(current_axis);
-
-//       container.add(azh);
-//       container.add(axh);
-//       container.add(ayh);
-
-//       const clone_arr = new Float32Array(profile_arr);
-
-//       transform_mat4.makeBasis(basis_x, basis_y, basis_z);
-
-//       for (let i = 0; i < clone_arr.length; i += 3) {
-//          const
-//             x = clone_arr[i],
-//             y = clone_arr[i + 1],
-//             z = clone_arr[i + 2];
-
-//          vertex.set(x, y, z)
-//             .applyMatrix4(transform_mat4)
-//             .add(current_axis);
-
-//          clone_arr[i] = vertex.x;
-//          clone_arr[i + 1] = vertex.y;
-//          clone_arr[i + 2] = vertex.z;
-//       };
-
-//       vertices.push(clone_arr);
-//       pathHelper(clone_arr);
-//       pointsHelper(clone_arr, 0x000000, 0.5);
+//       const pointA = new THREE.Vector3(cx, cy, cz);
+//       const pointB = new THREE.Vector3(nx, ny, nz);
+//       const dist = pointA.distanceTo(pointB);
+//       values_y.push(dist);
+//       max_y += dist;
 //    };
 
-//    return vertices;
-// };
+//    let value_x = 0;
 
-// function applyQuaternion(quaternion) {
-//    basis_z.applyQuaternion(quaternion);
-//    basis_x.applyQuaternion(quaternion);
-//    basis_y.applyQuaternion(quaternion);
-// };
+//    for (let i = 0; i < PROFILE_COUNT; i++) {
+//       uvs.push(
+//          value_x, 0,
+//       );
 
-// function rotateAroundLocalAxis(axis, angle) {
-//     rotation_mat4.makeRotationAxis(axis.clone().normalize(), angle);
+//       let value_y = 0;
 
-//     // Оновлюємо всі базисні вектори
-//     basis_x.applyMatrix4(rotation_mat4).normalize();
-//     basis_y.applyMatrix4(rotation_mat4).normalize();
-//     basis_z.applyMatrix4(rotation_mat4).normalize();
-// };
-
-// function applyAxisAngle(axis, angle) {
-//    basis_z.applyAxisAngle(axis, angle);
-//    basis_x.applyAxisAngle(axis, angle);
-//    basis_y.applyAxisAngle(axis, angle);
-// };
-
-// const quaternion = new THREE.Quaternion();
-
-// function makeProjection(profile_arr) {
-//    const vertices = [];
-
-//    for (let i = 1; i < axis.length - 1; i++) {
-//       const
-//          current_axis = axis[i],
-//          next_axis = axis[i + 1];
-//          // next_axis = axis[i + 1] || current_axis;
-
-//       dir.subVectors(next_axis, current_axis);
-//       // pointsHelper(new Float32Array([dir.x, dir.y, dir.z]), 0xff00ff, 1);
-//       // pointsHelper(new Float32Array([current_axis.x, current_axis.y, current_axis.z]), 0xff00ff, 1);
-
-//       dir.normalize();
-
-//       const
-//          sign_x = Math.sign(dir.x),
-//          sign_z = Math.sign(dir.z);
-
-//       let x_angle, y_angle;
-
-//       {
-//          const height = dir.y;
-//          const len = Math.hypot(dir.x, dir.z);
-//          y_angle = Math.atan2(height, len);
-//       }
-
-//       {
-//          const height = Math.abs(dir.z);
-//          const len = dir.x;
-//          x_angle = Math.atan2(len, height);
-//       }
-
-//       // console.log('log', i);
-//       // console.log('dir_______', dir, dir.clone().negate());
-//       // console.log('basis z_______', basis_z);
-//       // console.log('angles_________', x_angle, y_angle);
-      
-//       quaternion.setFromUnitVectors(basis_z, dir.clone().negate());
-//       applyQuaternion(quaternion);
-
-//       const
-//          azh = arrowHelper('z', basis_z),
-//          axh = arrowHelper('x', basis_x),
-//          ayh = arrowHelper('y', basis_y);
-
-//       azh.position.add(current_axis);
-//       axh.position.add(current_axis);
-//       ayh.position.add(current_axis);
-
-//       container.add(azh);
-//       container.add(axh);
-//       container.add(ayh);
-
-//       const clone_arr = new Float32Array(profile_arr);
-
-//       transform_mat4.makeBasis(basis_x, basis_y, basis_z);
-
-//       for (let i = 0; i < clone_arr.length; i += 3) {
-//          const
-//             x = clone_arr[i],
-//             y = clone_arr[i + 1],
-//             z = clone_arr[i + 2];
-
-//          vertex.set(x, y, z)
-//             .applyMatrix4(transform_mat4)
-//             .add(current_axis);
-
-//          clone_arr[i] = vertex.x;
-//          clone_arr[i + 1] = vertex.y;
-//          clone_arr[i + 2] = vertex.z;
+//       for (let j = 0; j < (vertices.length / PROFILE_COUNT) - 6; j+=3) {
+//          value_y += normalize(values_y[j / 3], min_y, max_y);
+//          uvs.push(value_x, value_y);
 //       };
 
-//       vertices.push(clone_arr);
-//       pathHelper(clone_arr);
-//       pointsHelper(clone_arr, 0x000000, 0.5);
+//       uvs.push(
+//          value_x, 1,
+//       );
+
+//       value_x += normalize(values_x[i], min_x, max_x);
 //    };
 
-//    return vertices;
-// };
-
-
-// function orthoProjections(profile_arr) {
-//    const projections = [], dirs = [];
-
-//    for (let i = 1; i < axis.length; i++) {
-//       const
-//          current_axis = axis[i],
-//          next_axis = axis[i + 1] || current_axis;
-
-//       dir.subVectors(next_axis, current_axis).normalize();
-
-//       quaternion.setFromUnitVectors(basis_z, dir.clone().negate());
-//       applyQuaternionToBasis(quaternion);
-//       showLocalCoords(current_axis);
-
-//       transform_mat4.makeBasis(basis_x, basis_y, basis_z);
-
-//       const clone_arr = new Float32Array(profile_arr);
-
-//       for (let i = 0; i < clone_arr.length; i += 3) {
-//          const
-//             x = clone_arr[i],
-//             y = clone_arr[i + 1],
-//             z = clone_arr[i + 2];
-
-//          vertex.set(x, y, z)
-//             .applyMatrix4(transform_mat4)
-//             .add(current_axis);
-
-//          clone_arr[i] = vertex.x;
-//          clone_arr[i + 1] = vertex.y;
-//          clone_arr[i + 2] = vertex.z;
-//       };
-
-//       projections.push(clone_arr);
-//       pathHelper(clone_arr);
-//       pointsHelper(clone_arr, 0x000000, 0.5);
-//    };
-
-//    return { projections, dirs };
+//    return uvs;
 // };

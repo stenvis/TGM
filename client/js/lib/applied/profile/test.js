@@ -1,61 +1,88 @@
 import helpers from "./helpers.js";
+import triangulation from "./triangulation.js";
 
 const {
-   normalMaterial,
+   pointsHelper,
    container,
 } = helpers;
 
-const triangulation = {
-   triangulate,
-};
+const vertices = [
+   -1,  2,  0, // 0
+    1,  0,  0, // 1
+    0, -2,  0, // 2
+   -2, -2,  0, // 3
+   -3, -1,  0, // 4
+   -3,  1,  0, // 5
 
-let dist_x = 0, dist_y = 0;
+   -1,  2,  0, // 6 
 
-function generateVertices(profiles_arr) {
-   const vertices = [];
+   -1,  2,  -7, // 7
+    1,  0,  -7, // 8
+    0, -2,  -7, // 9
+   -2, -2,  -7, // 10
+   -3, -1,  -7, // 11
+   -3,  1,  -7, // 12
 
-   for (let i = 0; i < profiles_arr.length; i++) {
-      const profile_arr  = profiles_arr[i];
-      vertices.push(...profile_arr);
-      vertices.push(profile_arr[0]);
-      vertices.push(profile_arr[1]);
-      vertices.push(profile_arr[2]);
-   };
+   -1,  2,  -7, // 13
 
-   return vertices;
-};
+   -1,  2,  -14, // 14 
+    1,  0,  -14, // 15 
+    0, -2,  -14, // 16 
+   -2, -2,  -14, // 17
+   -3, -1,  -14, // 18
+   -3,  1,  -14, // 19
 
-function generateIndices(profiles_len, vertices_len) {
-   const indices = [];
+   -1,  2,  -14, // 20 
+];
 
-   for (let i = 0; i < profiles_len - 1; i++) {
-      const src_i = i * vertices_len, dst_i = (i + 1) * vertices_len;
+const indices = [
+   0, 1, 7,
+   7, 1, 8,
 
-      for (let j = 0; j < vertices_len - 1; j++) {
-         const
-            i0 = src_i + j,
-            i1 = dst_i + j,
-            i2 = src_i + j + 1,
-            i3 = dst_i + j + 1;
+   1, 2, 8,
+   8, 2, 9,
 
-         indices.push(
-            i0, i2, i1,
-            i1, i2, i3,
-         );
-      };
-   };
+   2, 3, 9,
+   9, 3, 10,
 
-   return indices;
-};
+   3, 4, 10,
+   10, 4, 11,
+
+   4, 5, 11,
+   11, 5, 12,
+
+   5, 6, 12,
+   12, 6, 13,
+
+   7, 8, 14,
+   14, 8, 15,
+
+   8, 9, 15,
+   15, 9, 16,
+
+   9, 10, 16,
+   16, 10, 17,
+
+   10, 11, 17,
+   17, 11, 18,
+
+   11, 12, 18,
+   18, 12, 19,
+
+   12, 13, 19,
+   19, 13, 20,
+];
 
 function normalize(value, min, max) {
    return (value - min) / (max - min);
 };
 
-function generateUVs(vertices, profiles_len) {
+let dist_x = 0, dist_y = 0;
+
+function generateUVs() {
    const uvs = [];
 
-   const PROFILE_COUNT = profiles_len;
+   const PROFILE_COUNT = (vertices.length / 3) / 7;
 
    let min_x = 0, min_y = 0;
 
@@ -65,7 +92,7 @@ function generateUVs(vertices, profiles_len) {
 
    const len = vertices.length / 3;
 
-   for (let i = 0; i < 1; i++) {
+   for (let i = 0; i < PROFILE_COUNT - 1; i++) {
       const ci = len * i, ni = len * (i + 1);
       const
          cx = vertices[ci],
@@ -81,7 +108,7 @@ function generateUVs(vertices, profiles_len) {
          dist = pA.distanceTo(pB);
 
       values_x.push(dist);
-      dist_x = dist
+      dist_x += dist
    };
 
    for (let i = 0; i < (vertices.length / PROFILE_COUNT) - 3; i+=3) {
@@ -124,12 +151,21 @@ function generateUVs(vertices, profiles_len) {
    return uvs;
 };
 
-function mapping(vertices, indices, uvs) {
+function test() {
+   const { scene } = THREE_APP.system;
+
    const geometry = new THREE.BufferGeometry();
+
+   const uvs = generateUVs();
+
+   pointsHelper(new Float32Array(vertices), 0x000000, 0.3);
+   scene.add(container);
 
    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
    geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
    geometry.setIndex(indices);
+
+   geometry.computeVertexNormals();
 
    const textureLoader = new THREE.TextureLoader();
    const texture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg', () => {
@@ -141,43 +177,24 @@ function mapping(vertices, indices, uvs) {
 
    texture.wrapS = THREE.RepeatWrapping;
    texture.wrapT = THREE.RepeatWrapping;
-   const 
-      geometryWidth = dist_x,
-      geometryHeight = dist_y,
-      aspect = dist_x / dist_y,
-      basis_width = 2 * aspect,
-      basis_height = 2,
-      xR = geometryWidth / basis_width,
-      yR = geometryHeight / basis_height;
+   const geometryWidth = dist_x;
+   const geometryHeight = dist_y;
+   const aspect = dist_x / dist_y;
+   const basis_width = 2;
+   const basis_height = 2;
+   const xR = geometryWidth / basis_width;
+   const yR = geometryHeight / basis_height;
 
-   // console.log('dist x, y:', dist_x, dist_y);
-   // console.log('aspect:', aspect);
-   texture.repeat.set(1 * aspect, 1);
+   texture.repeat.set(xR, yR);
 
    const material = new THREE.MeshBasicMaterial({ 
+   // const material = new THREE.MeshNormalMaterial({ 
       map: texture,
       side: THREE.DoubleSide,
    });
 
    const mesh = new THREE.Mesh(geometry, material);
-
-   container.add(mesh);
+   scene.add(mesh);
 };
 
-function triangulate(profiles_arr, textures_indices) {
-   dist_x = 0; dist_y = 0;
-
-   const
-      profiles_len = profiles_arr.length,
-      vertices_len = (profiles_arr[0].length / 3) + 1;
-
-   const
-      vertices = generateVertices(profiles_arr),
-      indices = generateIndices(profiles_len, vertices_len),
-      uvs = generateUVs(vertices, profiles_len, textures_indices);
-
-   mapping(vertices, indices, uvs);
-   normalMaterial(vertices, indices);
-};
-
-export default triangulation;
+export default test;

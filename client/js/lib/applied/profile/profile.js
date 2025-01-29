@@ -25,10 +25,10 @@ const profile = {
 };
 
 const profile_data = [
-   { x: -1, y: 2, r: 2, texture: 'brick' },
-   // { x: -1, y: 2, },
+   // { x: -1, y: 2, r: 2, texture: 'brick' },
+   { x: -1, y: 2, r: 2 },
    { x: 1, y: 0, },
-   { x: 0, y: -2, texture: 'bump' },
+   { x: 0, y: -2 },
    { x: -2, y: -2, },
    { x: -3, y: -1, },
    { x: -3, y: 1, },
@@ -158,7 +158,7 @@ function innerArc(x0, y0, x1, y1, input_radius) {
 function segmentateData(data) {
    const len = data.length - 1;
 
-   const points = [];
+   const points = [], textures_indices = {};
 
    for (let i = 0; i < len; i++) {
       const p0 = data[i], p1 = data[i + 1];
@@ -171,18 +171,25 @@ function segmentateData(data) {
       if (p0.r) {
          const input_radius = Number(p0.r);
 
+         let arc_points;
+
          if (input_radius >= 1) {
-            // const { px, py } = outerArc(x0, y0, x1, y1, input_radius);
-            // points.push(px, py, 0);
-            const arc_points = outerArc(x0, y0, x1, y1, input_radius);
-            points.push(...arc_points);
-            continue;
+            arc_points = outerArc(x0, y0, x1, y1, input_radius);
          };
 
-         // const { px, py } = innerArc(x0, y0, x1, y1, input_radius);
-         // points.push(px, py, 0);
-         const arc_points = innerArc(x0, y0, x1, y1, input_radius);
+         arc_points = innerArc(x0, y0, x1, y1, input_radius);
+
          points.push(...arc_points);
+
+         if (p0.texture) {
+            const end_i = (points.length / 3) - 1;
+            const start_i = end_i - (arc_points.length / 3);
+            textures_indices[p0.texture] = {
+               start_i,
+               end_i,
+            };
+         };
+
          continue;
       };
    };
@@ -191,17 +198,17 @@ function segmentateData(data) {
 
    points.push(x, y, 0);
 
-   return new Float32Array(points);
+   return { points: new Float32Array(points), textures_indices };
 };
 
 function generate(input_data = profile_data) {
    const { scene } = THREE_APP.system;
 
-   const points_arr = segmentateData(input_data);
+   const profile_data = segmentateData(input_data);
    // pointsHelper(points_arr, 0x000000, 1);
    // pathHelper(points_arr);
 
-   extruder.extrude(points_arr);
+   extruder.extrude(profile_data);
 
    scene.add(container);
 };
