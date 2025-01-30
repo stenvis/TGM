@@ -14,14 +14,22 @@ const extruder = {
 
 // ------------------------------- TESTS ------------------------------------
 
-const axis = [
-   { x: 0, y: 0, z: 0, },
-   { x: 10, y: 0, z: 0, },
-   { x: 15, y: 10, z: 0, },
-   { x: 10, y: 10, z: 10, },
-   { x: 10, y: 20, z: 10, },
-   { x: 0, y: 20, z: 20, },
-];
+// const axis = [
+//    { x: 0, y: 0, z: 0, },
+//    { x: 10, y: 0, z: 0, },
+//    { x: 15, y: 10, z: 0, },
+//    { x: 10, y: 10, z: 10, },
+//    { x: 10, y: 20, z: 10, },
+//    { x: 0, y: 20, z: 20, },
+// ];
+
+
+// const axis = [
+//    { x: 0, y: 0, z: 0, },
+//    { x: 10, y: 0, z: 0, },
+//    { x: 40, y: 0, z: 0, },
+//    { x: 80, y: 0.1, z: 0, },
+// ];
 
 // const axis = [ 
 //    { x: 0, y: 0, z: 0, },
@@ -104,39 +112,39 @@ const axis = [
    // { x: 0, y: 0, z: 25, },
 // ];
 
-// const axis = (function() {
-//    const points = [];
-//    const count = 100;
-//    const radius = 10;
-//    const { sin, cos } = Math;
+const axis = (function() {
+   const points = [];
+   const count = 100;
+   const radius = 10;
+   const { sin, cos } = Math;
 
-//    for (let i = 0; i < count; i++) {
-//       const theta = 0.1 + ((2 * Math.PI * i) / count);
-//       points.push({
-//          // x: i * cos(theta),
-//          // y: i * sin(theta),
-//          // z: i,
-//          // // z: sin(theta),
+   for (let i = 0; i < count; i++) {
+      const theta = 0.1 + ((2 * Math.PI * i) / count);
+      points.push({
+         x: i * cos(theta),
+         y: i * sin(theta),
+         z: i,
+         // z: sin(theta),
 
-//          // x: radius * cos(theta),
-//          // y: radius * sin(theta),
-//          // // z: i,
-//          // z: sin(theta),
+         // x: radius * cos(theta),
+         // y: radius * sin(theta),
+         // // z: i,
+         // z: sin(theta),
 
-//          x: radius * cos(theta),
-//          y: sin(theta),
-//          // y: i,
-//          z: radius * sin(theta),
+         // x: radius * cos(theta),
+         // y: sin(theta),
+         // // y: i,
+         // z: radius * sin(theta),
 
-//          // x: sin(theta),
-//          // // x: i,
-//          // y: radius * cos(theta),
-//          // z: radius * sin(theta),
-//        });
-//    }
+         // x: sin(theta),
+         // // x: i,
+         // y: radius * cos(theta),
+         // z: radius * sin(theta),
+       });
+   }
 
-//    return points;
-// })();
+   return points;
+})();
 
 // ------------------------------- TESTS ------------------------------------
 
@@ -173,8 +181,8 @@ function closestPointBetweenRays(P1, D1, P2, D2) {
     const denominator = a * c - b * b;
 
     if (Math.abs(denominator) < 1e-6) {
-      console.log('Not correct positions or directions: ', D1, D2);
-      return null;
+      console.log('Forward direction');
+      return P2;
     };
 
     const 

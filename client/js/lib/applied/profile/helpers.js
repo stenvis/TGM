@@ -44,7 +44,7 @@ function circleHelper(r, px, py, numPoints = 70) {
    pointsHelper(new Float32Array(points), 0xff0000);
 };
 
-function pointsHelper(points_arr, color = 0x000000, size = 0.081) {
+function pointsHelper(points_arr, color = 0x000000, size = 0.4) {
    const geometry = new THREE.BufferGeometry();
    geometry.setAttribute('position', new THREE.BufferAttribute(points_arr, 3));
 

@@ -3,6 +3,7 @@ import helpers from "./helpers.js";
 const {
    normalMaterial,
    container,
+   pointsHelper,
 } = helpers;
 
 const triangulation = {
@@ -21,6 +22,8 @@ function generateVertices(profiles_arr) {
       vertices.push(profile_arr[1]);
       vertices.push(profile_arr[2]);
    };
+
+   pointsHelper(new Float32Array(vertices));
 
    return vertices;
 };
@@ -63,10 +66,11 @@ function generateUVs(vertices, profiles_len) {
       values_x = [],
       values_y = [];
 
-   const len = vertices.length / 3;
+   const len = (vertices.length / 3) / PROFILE_COUNT;
 
-   for (let i = 0; i < 1; i++) {
-      const ci = len * i, ni = len * (i + 1);
+   for (let i = 0; i < PROFILE_COUNT - 1; i++) {
+      const ci = len * i * 3, ni = len * (i + 1) * 3;
+
       const
          cx = vertices[ci],
          cy = vertices[ci + 1],
@@ -81,7 +85,7 @@ function generateUVs(vertices, profiles_len) {
          dist = pA.distanceTo(pB);
 
       values_x.push(dist);
-      dist_x = dist
+      dist_x += dist
    };
 
    for (let i = 0; i < (vertices.length / PROFILE_COUNT) - 3; i+=3) {
@@ -102,8 +106,9 @@ function generateUVs(vertices, profiles_len) {
       dist_y += dist;
    };
 
+   let value_x = 0;
+
    for (let i = 0; i < PROFILE_COUNT; i++) {
-      const value_x = normalize(i, min_x, PROFILE_COUNT - 1);
 
       uvs.push(
          value_x, 0,
@@ -119,6 +124,8 @@ function generateUVs(vertices, profiles_len) {
       uvs.push(
          value_x, 1,
       );
+
+      value_x += normalize(values_x[i], min_x, dist_x);
    };
 
    return uvs;
@@ -132,12 +139,14 @@ function mapping(vertices, indices, uvs) {
    geometry.setIndex(indices);
 
    const textureLoader = new THREE.TextureLoader();
-   const texture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg', () => {
-      window.render.update();
-   });
-   // const texture = textureLoader.load('/assets/brick.jpeg', () => {
+
+   // const texture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg', () => {
    //    window.render.update();
    // });
+
+   const texture = textureLoader.load('/assets/brick.jpeg', () => {
+      window.render.update();
+   });
 
    texture.wrapS = THREE.RepeatWrapping;
    texture.wrapT = THREE.RepeatWrapping;
@@ -147,12 +156,13 @@ function mapping(vertices, indices, uvs) {
       aspect = dist_x / dist_y,
       basis_width = 2 * aspect,
       basis_height = 2,
-      xR = geometryWidth / basis_width,
+      xR = geometryWidth / basis_width * aspect,
       yR = geometryHeight / basis_height;
 
    // console.log('dist x, y:', dist_x, dist_y);
    // console.log('aspect:', aspect);
-   texture.repeat.set(1 * aspect, 1);
+   texture.repeat.set(aspect, 1);
+   // texture.repeat.set(xR, yR);
 
    const material = new THREE.MeshBasicMaterial({ 
       map: texture,
@@ -177,7 +187,7 @@ function triangulate(profiles_arr, textures_indices) {
       uvs = generateUVs(vertices, profiles_len, textures_indices);
 
    mapping(vertices, indices, uvs);
-   normalMaterial(vertices, indices);
+   // normalMaterial(vertices, indices);
 };
 
 export default triangulation;
