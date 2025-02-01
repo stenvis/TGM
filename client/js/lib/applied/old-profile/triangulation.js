@@ -4,7 +4,6 @@ const {
    normalMaterial,
    container,
    pointsHelper,
-   pathHelper,
 } = helpers;
 
 const triangulation = {
@@ -13,18 +12,33 @@ const triangulation = {
 
 let dist_x = 0, dist_y = 0;
 
-function generateVertices(profiles_arr, si, ei) {
+function generateClosureVertices(profiles_arr) {
    const vertices = [];
 
    for (let i = 0; i < profiles_arr.length; i++) {
-      const profile_arr = profiles_arr[i];
+      const profile_arr  = profiles_arr[i];
+      vertices.push(...profile_arr);
+      vertices.push(profile_arr[0]);
+      vertices.push(profile_arr[1]);
+      vertices.push(profile_arr[2]);
+   };
+
+   pointsHelper(new Float32Array(vertices));
+
+   return vertices;
+};
+
+function generateBaseVertices(profiles_arr, si, ei) {
+   const vertices = [];
+
+   for (let i = 0; i < profiles_arr.length; i++) {
+      const profile_arr  = profiles_arr[i];
       for (let j = si; j < ei; j++) {
          vertices.push(profile_arr[j]);
       };
    };
 
-   // pointsHelper(new Float32Array(vertices), 0xff0000, 100);
-   // pathHelper(new Float32Array(vertices, 0xff0000, .4));
+   pointsHelper(new Float32Array(vertices));
 
    return vertices;
 };
@@ -36,7 +50,6 @@ function generateIndices(profiles_len, vertices_len) {
       const src_i = i * vertices_len, dst_i = (i + 1) * vertices_len;
 
       for (let j = 0; j < vertices_len - 1; j++) {
-         // console.log('j', j);
          const
             i0 = src_i + j,
             i1 = dst_i + j,
@@ -124,7 +137,50 @@ function generateUVs(vertices, profiles_len) {
    return uvs;
 };
 
-function mapping(vertices, indices, uvs, texture_name) {
+function mapping(vertices, indices, uvs) {
+   const geometry = new THREE.BufferGeometry();
+
+   geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
+   geometry.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(uvs), 2));
+   geometry.setIndex(indices);
+
+   const textureLoader = new THREE.TextureLoader();
+
+   // const texture = textureLoader.load('https://threejs.org/examples/textures/uv_grid_opengl.jpg', () => {
+   //    window.render.update();
+   // });
+
+   const texture = textureLoader.load('/assets/brick.jpeg', () => {
+      window.render.update();
+   });
+
+   texture.wrapS = THREE.RepeatWrapping;
+   texture.wrapT = THREE.RepeatWrapping;
+   const 
+      geometryWidth = dist_x,
+      geometryHeight = dist_y,
+      aspect = dist_x / dist_y,
+      basis_width = 2 * aspect,
+      basis_height = 2,
+      xR = geometryWidth / basis_width * aspect,
+      yR = geometryHeight / basis_height;
+
+   // console.log('dist x, y:', dist_x, dist_y);
+   // console.log('aspect:', aspect);
+   texture.repeat.set(aspect, 1);
+   // texture.repeat.set(xR, yR);
+
+   const material = new THREE.MeshBasicMaterial({ 
+      map: texture,
+      side: THREE.DoubleSide,
+   });
+
+   const mesh = new THREE.Mesh(geometry, material);
+
+   container.add(mesh);
+};
+
+function baseMapping(vertices, indices, uvs, texture_name) {
    const geometry = new THREE.BufferGeometry();
 
    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3));
@@ -160,27 +216,38 @@ function mapping(vertices, indices, uvs, texture_name) {
 function triangulate(profiles_arr, textures_indices) {
    dist_x = 0; dist_y = 0;
 
-   const
-      profiles_len = profiles_arr.length;
-
-   for (const texture_data of textures_indices) {
-      const 
-         start_i = texture_data[0],
-         end_i = texture_data[1] + 1,
-         texture_name = texture_data[2];
-
+   if (textures_indices.length) {
       const
-         vertices_len = end_i - start_i;
+         profiles_len = profiles_arr.length;
 
-      // console.log('vertices len', vertices_len);
-      const
-         vertices = generateVertices(profiles_arr, start_i * 3, end_i * 3),
-         indices = generateIndices(profiles_len, vertices_len),
-         uvs = generateUVs(vertices, profiles_len, textures_indices);
+      for (const texture_data of textures_indices) {
+         const { start_i, end_i, texture_name } = texture_data;
+         const
+            vertices_len = end_i - start_i;
 
-      mapping(vertices, indices, uvs, texture_name);
-      // normalMaterial(vertices, indices);
+         const
+            vertices = generateBaseVertices(profiles_arr, start_i * 3, end_i * 3),
+            indices = generateIndices(profiles_len, vertices_len),
+            uvs = generateUVs(vertices, profiles_len, textures_indices);
+
+         // console.log(texture_name, vertices, indices, uvs);
+
+         baseMapping(vertices, indices, uvs, texture_name);
+      };
+      return;
    };
+
+   const
+      profiles_len = profiles_arr.length,
+      vertices_len = (profiles_arr[0].length / 3) + 1;
+
+   const
+      vertices = generateClosureVertices(profiles_arr),
+      indices = generateIndices(profiles_len, vertices_len),
+      uvs = generateUVs(vertices, profiles_len, textures_indices);
+
+   mapping(vertices, indices, uvs);
+   // normalMaterial(vertices, indices);
 };
 
 export default triangulation;

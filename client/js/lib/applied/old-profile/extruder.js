@@ -25,9 +25,9 @@ const extruder = {
 
 const axis = [
    { x: 0, y: 0, z: 0, },
-   { x: 1000, y: 0, z: 0, },
-   { x: 4000, y: 0.1, z: 0, },
-   { x: 8000, y: 0.1, z: 0, },
+   { x: 10, y: 0, z: 0, },
+   { x: 40, y: 0.1, z: 0, },
+   { x: 80, y: 0.1, z: 0, },
 ];
 
 // const axis = [ 
@@ -180,7 +180,7 @@ function closestPointBetweenRays(P1, D1, P2, D2) {
     const denominator = a * c - b * b;
 
     if (Math.abs(denominator) < 1e-6) {
-      // console.log('Forward direction');
+      console.log('Forward direction');
       return P2;
     };
 
@@ -310,8 +310,8 @@ function orthoProjections(profile_arr) {
       ortho_projections_1.push(p1_arr);
       // pathHelper(p0_arr);
       // pathHelper(p1_arr);
-      pointsHelper(p0_arr, 0x000000, 100);
-      pointsHelper(p1_arr, 0x000000, 100);
+      // pointsHelper(p0_arr, 0x000000, 0.5);
+      // pointsHelper(p1_arr, 0x000000, 0.5);
    };
 };
 

@@ -4,8 +4,9 @@ const CTX_PRESETS = {
 };
 
 const ORBIT_CONTROL_PRESETS = {
-   minDistance: 1,
-   maxDistance: 100,
+   minDistance: 100,
+   // maxDistance: 100,
+   maxDistance: 10000,
    rotateSpeed: 0.4,
    zoomSpeed: 1.4,
    dampingFactor: 0.2,

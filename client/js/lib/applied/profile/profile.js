@@ -1,5 +1,7 @@
 import helpers from "./helpers.js";
 import extruder from "./extruder.js";
+import profile_data from "./profile-data.js";
+// import profile_data from "./test.js";
 
 const {
    circleHelper,
@@ -8,195 +10,51 @@ const {
    container,
 } = helpers;
 
-const input = document.getElementById('radius');
-input.addEventListener('input', update);
-
-function update({ target }) {
-   const { value } = target;
-
-   profile_data[0].r = value;
-   container.clear();
-   generate();
-   window.render.update();
-};
-
 const profile = {
    generate,
 };
 
-const profile_data = [
-   // { x: -1, y: 2, r: 2, texture: 'brick' },
-   { x: -1, y: 2, r: 2 },
-   { x: 1, y: 0, },
-   { x: 0, y: -2 },
-   { x: -2, y: -2, },
-   { x: -3, y: -1, },
-   { x: -3, y: 1, },
-];
+function extractPoints(profile_data) {
+   const points = [], textures_indices = [];
 
-const { PI, sin, cos, sqrt, hypot, atan2 } = Math;
+   // textures_indices = [
+   //    [
+   //       i,
+   //       i + 1,
+   //       texture,
+   //    ],
+   //    [
+   //       i,
+   //       i + 1,
+   //       texture,
+   //    ]
+   // ];
 
-const NUM_POINTS = 10;
+   let _last_texture = null;
 
-function drawArc(r, px, py, sa, ea, np = NUM_POINTS) {
-   const points = [];
+   const { a } = profile_data[0];
 
-   if (ea > sa) ea -= 2 * PI;
+   points.push(a.x, a.y, a.z);
 
-   for (let i = 1; i < np; i++) {
-      const angle = sa + (i / np) * (ea - sa);
-      points.push(px + cos(angle) * r, py + sin(angle) * r, 0);
-   };
+   for (let i = 0; i < profile_data.length; i++) {
+      let { b, texture } = profile_data[i];
 
-   // pointsHelper(new Float32Array(points), 0xff0000);
-   return points;
-};
+      texture = texture || 'brick';
 
-function outerArc(x0, y0, x1, y1, input_radius) {
-   const radius = input_radius - 1;
+      points.push(b.x, b.y, b.z);
 
-   // mid point
-   const
-      mx = (x0 + x1) / 2,
-      my = (y0 + y1) / 2;
-
-   // perpendicular direction + length
-   const
-      dx = -(y1 - y0),
-      dy = x1 - x0,
-      length = hypot(dx, dy);
-
-   // scale rate as normalize
-   const scale = radius / length;
-
-   // perpendicular of radius length from the mid point
-   const 
-      px = mx + dx * scale,
-      py = my + dy * scale;
-
-   const 
-      pmx = py - y0,
-      pmy = px - x0;
-
-   const r = hypot(pmx, pmy);
-
-   // start - end angles for arc
-   const 
-      sa = atan2(y0 - py, x0 - px),
-      ea = atan2(y1 - py, x1 - px);
-
-   const points = drawArc(r, px, py, sa, ea);
-
-   // pointsHelper(new Float32Array([x0, y0, 0]));
-   // return { px, py };
-
-   return points;
-};
-
-function perpendicularSlope(p1x, p1y, p2x, p2y) {
-    const dx = p2x - p1x;
-    const dy = p2y - p1y;
-    return -dx / dy;
-};
-
-function innerArc(x0, y0, x1, y1, input_radius) {
-   const
-      mx = (x0 + x1) / 2,
-      my = (y0 + y1) / 2;
-
-   const
-      dx = -(y1 - y0),
-      dy = x1 - x0,
-      length = sqrt(dx * dx + dy * dy);
-
-   const scale = input_radius / length;
-
-   const r_scale = length / 2;
-
-   const 
-      px = mx + dx * scale * r_scale,
-      py = my + dy * scale * r_scale;
-
-      
-   const 
-      mx1 = (x0 + px) / 2,
-      my1 = (y0 + py) / 2;
-
-   const 
-      mx2 = (px + x1) / 2,
-      my2 = (py + y1) / 2;
-
-   const m1 = perpendicularSlope(x0, y0, px, py);
-   const m2 = perpendicularSlope(px, py, x1, y1);
-
-   const b1 = my1 - m1 * mx1;
-   const b2 = my2 - m2 * mx2;
-
-   const cx = (b2 - b1) / (m1 - m2);
-   const cy = m1 * cx + b1;
-
-   const new_radius = hypot((cx - x0), (cy - y0));
-
-   // pointsHelper(new Float32Array([
-   //    mx1, my1, 0,
-   //    mx2, my2, 0,
-   //    cx, cy, 0,
-   //    px, py, 0
-   // ]));
-
-   const 
-      sa = atan2(y0 - cy, x0 - cx),
-      ea = atan2(y1 - cy, x1 - cx);
-
-   const points = drawArc(new_radius, cx, cy, sa, ea);
-   // circleHelper(input_radius * r_scale, mx, my);
-   // circleHelper(new_radius, cx, cy);
-
-   return points;
-};
-
-function segmentateData(data) {
-   const len = data.length - 1;
-
-   const points = [], textures_indices = {};
-
-   for (let i = 0; i < len; i++) {
-      const p0 = data[i], p1 = data[i + 1];
-      const
-         x0 = p0.x, y0 = p0.y,
-         x1 = p1.x, y1 = p1.y;
-
-      points.push(x0, y0, 0);
-
-      if (p0.r) {
-         const input_radius = Number(p0.r);
-
-         let arc_points;
-
-         if (input_radius >= 1) {
-            arc_points = outerArc(x0, y0, x1, y1, input_radius);
-         };
-
-         arc_points = innerArc(x0, y0, x1, y1, input_radius);
-
-         points.push(...arc_points);
-
-         if (p0.texture) {
-            const end_i = (points.length / 3) - 1;
-            const start_i = end_i - (arc_points.length / 3);
-            textures_indices[p0.texture] = {
-               start_i,
-               end_i,
-            };
-         };
-
+      if (_last_texture == texture) {
+         const li = textures_indices.length - 1;
+         textures_indices[li][1] = i + 1;
          continue;
       };
+
+      textures_indices.push([i, i + 1, texture]);
+      _last_texture = texture;
    };
 
-   const { x, y } = data[len]; 
-
-   points.push(x, y, 0);
+   // console.log('points', points);
+   // console.log(textures_indices);
 
    return { points: new Float32Array(points), textures_indices };
 };
@@ -204,11 +62,12 @@ function segmentateData(data) {
 function generate(input_data = profile_data) {
    const { scene } = THREE_APP.system;
 
-   const profile_data = segmentateData(input_data);
-   // pointsHelper(points_arr, 0x000000, 1);
-   // pathHelper(points_arr);
+   const data = extractPoints(input_data);
+   // const { points } = segmentateData(input_data);
+   // pointsHelper(points, 0x000000, 1);
+   // pathHelper(points);
 
-   extruder.extrude(profile_data);
+   extruder.extrude(data);
 
    scene.add(container);
 };

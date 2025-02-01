@@ -23,7 +23,8 @@ scene.background = new THREE.Color(canvas_bg_color);
 // const { width, height } = canvas;
 
 const
-   camera = new THREE.PerspectiveCamera(45),
+   // camera = new THREE.PerspectiveCamera(45),
+   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100000),
    // camera = new THREE.OrthographicCamera( width / - 2, width / 2, height / 2, height / - 2, 1, 1000 ),
    orbit = new OrbitControl(camera, canvas, ORBIT_CONTROL_PRESETS);
 
@@ -54,9 +55,9 @@ function generateAxis(p0, p1, color) {
 
 function createAxeseGroup() {
    const 
-      axis_x  = generateAxis([-1000, 0, 0], [1000, 0, 0], 0xff0000),
-      axis_y  = generateAxis([0, -1000, 0], [0, 1000, 0], 0x00ff00),
-      axis_z  = generateAxis([0, 0, -1000], [0, 0, 1000], 0x0000ff);
+      axis_x  = generateAxis([-100000, 0, 0], [100000, 0, 0], 0xff0000),
+      axis_y  = generateAxis([0, -100000, 0], [0, 100000, 0], 0x00ff00),
+      axis_z  = generateAxis([0, 0, -100000], [0, 0, 100000], 0x0000ff);
      
    const group = new THREE.Group().add(axis_x).add(axis_y).add(axis_z);
    return group;
@@ -66,8 +67,8 @@ scene.add(createAxeseGroup());
 
 // renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 
-camera.position.set(10, 5, 10);
-// camera.position.set(10, 5, 70);
+// camera.position.set(10, 5, 10);
+camera.position.set(1000, 500, 7000);
 
 const system = {
    canvas,
