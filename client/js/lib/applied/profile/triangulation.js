@@ -1,4 +1,4 @@
-import helpers from "./helpers.js";
+import helpers from "../helpers.js";
 
 const {
    normalMaterial,
@@ -64,7 +64,7 @@ function generateUVs(vertices, profiles_len) {
 
    let min_x = 0, min_y = 0;
 
-   const 
+   const
       values_x = [],
       values_y = [];
 
@@ -90,7 +90,7 @@ function generateUVs(vertices, profiles_len) {
       dist_x += dist
    };
 
-   for (let i = 0; i < (vertices.length / PROFILE_COUNT) - 3; i+=3) {
+   for (let i = 0; i < (vertices.length / PROFILE_COUNT) - 3; i += 3) {
       const
          cx = vertices[i],
          cy = vertices[i + 1],
@@ -99,7 +99,7 @@ function generateUVs(vertices, profiles_len) {
          ny = vertices[i + 4],
          nz = vertices[i + 5];
 
-      const 
+      const
          pA = new THREE.Vector3(cx, cy, cz),
          pB = new THREE.Vector3(nx, ny, nz),
          dist = pA.distanceTo(pB);
@@ -158,13 +158,11 @@ function mapping(vertices, indices, uvs, texture_name) {
 };
 
 function triangulate(profiles_arr, textures_indices) {
-   dist_x = 0; dist_y = 0;
-
    const
       profiles_len = profiles_arr.length;
 
    for (const texture_data of textures_indices) {
-      const 
+      const
          start_i = texture_data[0],
          end_i = texture_data[1] + 1,
          texture_name = texture_data[2];
@@ -176,7 +174,7 @@ function triangulate(profiles_arr, textures_indices) {
       const
          vertices = generateVertices(profiles_arr, start_i * 3, end_i * 3),
          indices = generateIndices(profiles_len, vertices_len),
-         uvs = generateUVs(vertices, profiles_len, textures_indices);
+         uvs = generateUVs(vertices, profiles_len);
 
       mapping(vertices, indices, uvs, texture_name);
       // normalMaterial(vertices, indices);

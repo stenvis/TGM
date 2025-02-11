@@ -1,4 +1,4 @@
-import helpers from "./helpers.js";
+import helpers from "../helpers.js";
 import extruder from "./extruder.js";
 import profile_data from "./profile-data.js";
 // import profile_data from "./test.js";
@@ -56,7 +56,7 @@ function extractPoints(profile_data) {
    // console.log('points', points);
    // console.log(textures_indices);
 
-   return { points: new Float32Array(points), textures_indices };
+   return { points, textures_indices };
 };
 
 function generate(input_data = profile_data) {
