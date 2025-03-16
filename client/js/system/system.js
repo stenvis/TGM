@@ -68,7 +68,7 @@ scene.add(createAxeseGroup());
 // renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 
 // camera.position.set(10, 5, 10);
-camera.position.set(1000, 500, 7000);
+camera.position.set(3000, 3500, 2000);
 
 const system = {
    canvas,

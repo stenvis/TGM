@@ -10,36 +10,25 @@ const data = [
          "y": 1000,
          "z": 0
       },
-      "texture": 'brick',
-      "segment_count": 3,
+      "texture_name": 'brick',
+      "segment_count": 6,
+      "closure_type": null,
    },
-   // {
-   //    "a": {
-   //       "x": -300,
-   //       "y": 3000,
-   //       "z": 0
-   //    },
-   //    "b": {
-   //       "x": -500,
-   //       "y": 4000,
-   //       "z": 0,
-   //    },
-   //    "texture": 'red_brick',
-   //    "segment_count": 5,
-   // },
-   // {
-   //    "a": {
-   //       "x": -434.683349609375,
-   //       "y": 2000,
-   //       "z": 0,
-   //    },
-   //    "b": {
-   //       "x": -134.683349609375,
-   //       "y": 2400,
-   //       "z": 0,
-   //    },
-   //    "texture": 'uv_grid',
-   // },
+   {
+      "a": {
+         "x": -100,
+         "y": 1500,
+         "z": 0
+      },
+      "b": {
+         "x": -100,
+         "y": 2000,
+         "z": 0,
+      },
+      "texture_name": 'red_brick',
+      "segment_count": 36,
+      "closure_type": "linear_morph",
+   },
 ];
 
 export default data;
