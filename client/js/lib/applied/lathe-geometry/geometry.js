@@ -1,14 +1,16 @@
 import data from './data.js';
 import helpers from "../helpers.js";
 
-const interpolation_el = document.getElementById('interpolation');
+const seg_count_top_el = document.getElementById('seg-count-top');
+const seg_count_bot_el = document.getElementById('seg-count-bot');
+const seg_ratio_el = document.getElementById('seg-ratio');
+const vertices_el = document.getElementById('vertices');
+const interpolation_count_el = document.getElementById('interpolation-count');
 
 const {
    container,
    pointsHelper,
 } = helpers;
-
-const container_1 = new THREE.Object3D();
 
 const {
    max, min, PI, sin, cos, abs,
@@ -22,7 +24,9 @@ let phiStart = 0, phiEnd = PI * 2;
 let dist_x_b = 0, dist_x_t = 0, dist_y = 0;
 let LERP_VALUE = 0;
 
-const INTERPOLATION_COUNT = 12;
+let INTERPOLATION_COUNT = 5;
+
+let show_vertices = false;
 
 function extractPoints(data) {
    const { a, b } = data;
@@ -187,7 +191,7 @@ function mapping(vertices, indices, uvs, texture_name = 'uv_grid') {
 
    const mesh = new THREE.Mesh(geometry, material);
 
-   container_1.add(mesh);
+   container.add(mesh);
 };
 
 function interpolate(data, lerp_value) {
@@ -201,8 +205,6 @@ function interpolate(data, lerp_value) {
    // const lerp_value = LERP_VALUE;
 
    const int_vertices = [];
-
-   // console.log('vertices ratio:', vertices_ratio);
 
    const vec3 = new THREE.Vector3();
 
@@ -308,37 +310,6 @@ function triangulate(vertices_count) {
       j++;
    };
 
-   // const indices = [
-   //    0, 2, 3,
-   //    0, 3, 4,
-   //    0, 4, 5,
-   //    0, 5, 1,
-   //    1, 5, 6,
-   //    1, 6, 7,
-
-   //    2, 8, 9,
-   //    2, 9, 3,
-   //    3, 9, 10,
-   //    3, 10, 4,
-   //    4, 10, 11,
-   //    4, 11, 5,
-   //    5, 11, 12,
-   //    5, 12, 6,
-   //    6, 12, 13,
-   //    6, 13, 7,
-
-   //    8, 14, 15,
-   //    8, 15, 9,
-   //    9, 15, 16,
-   //    9, 16, 10,
-   //    10, 16, 17,
-   //    10, 17, 11,
-   //    11, 17, 18,
-   //    11, 18, 12,
-   //    12, 18, 19,
-   //    12, 19, 13,
-   // ];
-
    return indices;
 };
 
@@ -354,8 +325,6 @@ function drawSegment(segments_vertices, indices) {
       geometry.computeVertexNormals();
       const mesh = new THREE.Mesh(geometry, material);
       container.add(mesh);
-
-      pointsHelper(new Float32Array(vertices), 0x000000, 20);
    };
 };
 
@@ -414,7 +383,9 @@ function determinateVertices(src_vertices, int_vertices, dst_vertices, is_even) 
       src_len = src_vertices.length / 3,
       int_len = int_vertices[0].length / 3,
       ratio = int_len / src_len,
-      hf_ratio = ratio / 2;
+      hf_ratio = ratio / 2,
+      hf_ratio_min = ~~(ratio / 2),
+      hf_ratio_max = hf_ratio_min + 1;
 
       const 
          p0 = new THREE.Vector3(),
@@ -435,11 +406,10 @@ function determinateVertices(src_vertices, int_vertices, dst_vertices, is_even) 
       ]);
    };
 
-   int_vertices.push([...dst_vertices.splice(-hf_ratio * 3), ...dst_vertices])
-
    if (is_even) {
+      int_vertices.push([...dst_vertices.splice(-hf_ratio * 3), ...dst_vertices])
 
-      for (let i = 0; i < int_vertices.length; i++) {
+      for (let i = 0; i < INTERPOLATION_COUNT; i++) {
          const vertices = int_vertices[i];
 
          const i0 = (hf_ratio - 1) * 3, i1 = hf_ratio * 3;
@@ -479,16 +449,41 @@ function determinateVertices(src_vertices, int_vertices, dst_vertices, is_even) 
 
          output_vertices[j].push(ps.x, ps.y, ps.z);
       };
+
+      return output_vertices;
+   };
+
+   int_vertices.push([...dst_vertices.splice(-hf_ratio_min * 3), ...dst_vertices])
+
+   for (let i = 0; i < INTERPOLATION_COUNT; i++) {
+      const vertices = int_vertices[i];
+
+      let j;
+
+      for (j = 0; j < src_len - 1; j++) {
+         const 
+            offset = hf_ratio_min + (ratio * j),
+            limit = ratio * (1 + j) + hf_ratio_min;
+
+         for (let k = offset; k < limit + 1; k++) {
+            const i0 = k * 3;
+            output_vertices[j].push(vertices[i0], vertices[i0 + 1], vertices[i0 + 2]);
+         };
+      };
+
+      for (let i = -hf_ratio_max; i < hf_ratio_max; i++) {
+         const i0 = i * 3;
+         output_vertices[j].push(vertices.at(i0), vertices.at(i0 + 1), vertices.at(i0 + 2));
+      };
    };
 
    return output_vertices;
-   // continue
 };
 
-function update(needs_update = true, input_data = data) {
+function update(input_data = data) {
    dist_x_b = 0, dist_x_t = 0, dist_y = 0;
 
-   let _last_vertices, _last_segment_count;
+   let _last_vertices;
 
    for (const segment_data of input_data) {
       const
@@ -500,7 +495,7 @@ function update(needs_update = true, input_data = data) {
          indices = generateIndices(segment_count),
          uvs = generateUVs(vertices, segment_count);
 
-      if (needs_update) mapping(vertices, indices, uvs, texture_name);
+      mapping(vertices, indices, uvs, texture_name);
 
       if (closure_type) {
          let src_vertices = [], dst_vertices = [];
@@ -518,7 +513,7 @@ function update(needs_update = true, input_data = data) {
          // rotation angle alignment for uniform interpolation
          if (vertices_ratio % 2 == 0) {
             is_even = true;
-            phi = PI / (_last_vertices.length / 3);
+            phi = PI / segment_count;
          };
 
          for (let i = 0; i < _last_vertices.length; i += 6) {
@@ -554,31 +549,32 @@ function update(needs_update = true, input_data = data) {
             const SEGMENTS_COUNT = 1 / INTERPOLATION_COUNT;
 
             const int_vertices = [];
-            // const vertices = [...src_vertices];
 
             for (let i = SEGMENTS_COUNT; i < 1; i += SEGMENTS_COUNT) {
                const lerp_value = i;
                int_vertices.push(interpolate(data, lerp_value));
-               // vertices.push(...int_vertices);
             };
-
-            // int_vertices.push(dst_vertices);
 
             const segments_vertices = determinateVertices(src_vertices, int_vertices, dst_vertices, is_even);
 
-            // pointsHelper(new Float32Array(src_vertices), 0x000000, 20);
-            // pointsHelper(new Float32Array(vertices[0]), 0x000000, 20);
-            // pointsHelper(new Float32Array(dst_vertices), 0x000000, 20);
 
             const indices = triangulate(segments_vertices[0].length / 3);
             
             drawSegment(segments_vertices, indices);
+
+            if (show_vertices) {
+               // pointsHelper(new Float32Array(src_vertices), 0x000000, 20);
+               // for (const vertices of int_vertices) {
+               for (const vertices of segments_vertices) {
+                  pointsHelper(new Float32Array(vertices), 0x000000, 20);
+               };
+               // pointsHelper(new Float32Array(dst_vertices), 0x000000, 20);
+            };
          };
          // VERTICES MERGING (TEST)
       };
 
       _last_vertices = vertices;
-      _last_segment_count = segment_count;
    };
 };
 
@@ -586,16 +582,60 @@ function latheGeometry(input_data = data) {
    const { scene } = THREE_APP.system;
    update();
    scene.add(container);
-   scene.add(container_1);
+};
+
+let seg_count_bot = 4;
+let seg_count_top = 12;
+
+function updateRatio() {
+   seg_ratio_el.innerText = `Segment Ratio ${seg_count_top} / ${seg_count_bot} = ${seg_count_top / seg_count_bot}`;
 };
 
 {
-   interpolation_el.addEventListener('input', ev => {
-      LERP_VALUE = Number(ev.target.value);
+   seg_count_top_el.addEventListener('input', ev => {
+      const value = Number(ev.target.value);
+      data[1].segment_count = value;
+      seg_count_top = value;
       container.clear();
-      update(false, data);
+      update(data);
+      window.render.update();
+      updateRatio();
+   });
+
+   seg_count_bot_el.addEventListener('input', ev => {
+      const value = Number(ev.target.value);
+      data[0].segment_count = value;
+      data[1].segment_count = value * 3;
+      seg_count_top = value * 3;
+      seg_count_bot = value;
+      seg_count_top_el.setAttribute('step', value);
+      seg_count_top_el.setAttribute('min', value);
+      seg_count_top_el.setAttribute('value', value * 3);
+      container.clear();
+      update(data);
+      window.render.update();
+      updateRatio();
+   });
+
+   interpolation_count_el.addEventListener('input', ev => {
+      const value = Number(ev.target.value);
+      INTERPOLATION_COUNT = value;
+      container.clear();
+      update(data);
+      window.render.update();
+      updateRatio();
+   });
+
+   vertices_el.addEventListener('click', ev => {
+      vertices_el.classList.toggle("active");
+      show_vertices = !show_vertices;
+      container.clear();
+      update(data);
       window.render.update();
    });
+
+   updateRatio();
+   vertices_el.click();
 }
 
 export default latheGeometry;

@@ -2,10 +2,35 @@
     position: absolute;
     top: 0;
     right: 0;
-    height: 2rem;
-    width: 10rem;
+    width: 12rem;
     z-index: 10;
-    margin: 2rem;
+    margin: 2rem 3rem;
+}
+
+.inputs input,
+#seg-ratio {
+    margin-bottom: 1.8rem;
+} 
+
+.btn-type-1 {
+   font-family: 'monospace';
+   font-size: 0.8rem;
+   cursor: pointer;
+   color: var(--font-color-1);
+   border: 2px solid lightgray;
+   padding: .5rem .7rem;
+   border-radius: 3rem;
+   text-align: center;
+   transition: .4s border, .4s color;
+}
+
+.btn-type-1:hover {
+   color: var(--active-color);
+}
+
+.btn-type-1.active {
+   border-color: var(--active-color);
+   color: var(--active-color);
 }
 
 input[type=range] {

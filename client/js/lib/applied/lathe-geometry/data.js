@@ -11,7 +11,7 @@ const data = [
          "z": 0
       },
       "texture_name": 'brick',
-      "segment_count": 6,
+      "segment_count": 3,
       "closure_type": null,
    },
    {
@@ -26,7 +26,7 @@ const data = [
          "z": 0,
       },
       "texture_name": 'red_brick',
-      "segment_count": 36,
+      "segment_count": 18,
       "closure_type": "linear_morph",
    },
 ];
